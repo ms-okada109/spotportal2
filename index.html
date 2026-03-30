@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スポットポータル</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Cormorant+Garamond:wght@400;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ===== 共通 ===== */
+:root {
+  --bg:       #f5f4f0;
+  --surface:  #ffffff;
+  --surface2: #f9f8f5;
+  --border:   #e2e0d8;
+  --border2:  #c8c5bc;
+  --navy:     #1a2744;
+  --navy2:    #2a3a5c;
+  --accent:   #c0392b;
+  --gold:     #8a6e3e;
+  --text:     #1a1a1a;
+  --muted:    #767068;
+  --sub:      #9e9890;
+  --green:    #1d6b4a;
+  --red:      #c0392b;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Noto Sans JP', sans-serif;
+  min-height: 100vh;
+  font-size: 13px;
+}
+
+/* ヘッダー */
+header {
+  position: fixed; top:0; left:0; right:0; height:56px;
+  background: var(--navy);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 32px; z-index: 300;
+  border-bottom: 3px solid var(--accent);
+}
+.logo { display:flex; align-items:center; gap:14px; cursor:pointer; }
+.logo-mark {
+  width: 28px; height: 28px;
+  border: 2px solid rgba(255,255,255,0.6);
+  border-radius: 2px;
+  display: flex; align-items:center; justify-content:center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px; font-weight: 600;
+  color: #fff; letter-spacing: .02em;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-family: 'Noto Sans JP', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: #fff; letter-spacing: .12em;
+}
+.logo-sep { width: 1px; height: 16px; background: rgba(255,255,255,0.25); }
+.logo-page { font-size: 11px; color: rgba(255,255,255,0.55); letter-spacing:.06em; }
+.hdr-right { display:flex; align-items:center; gap:18px; }
+.clock { font-family:'DM Mono',monospace; font-size:11px; color:rgba(255,255,255,0.5); }
+.back-btn {
+  font-size:11px; color:rgba(255,255,255,0.65); cursor:pointer;
+  border:1px solid rgba(255,255,255,0.25); padding:5px 12px; border-radius:2px;
+  letter-spacing:.05em; transition:all .15s; background:transparent;
+}
+.back-btn:hover { background:rgba(255,255,255,0.1); color:#fff; }
+
+/* ステータスバー */
+.statusbar {
+  position:fixed; bottom:0; left:0; right:0; height:28px;
+  background: var(--navy);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  display:flex; align-items:center; padding:0 24px; gap:24px; z-index:300;
+  font-family:'DM Mono',monospace; font-size:10px; color:rgba(255,255,255,0.4);
+}
+.si { display:flex; align-items:center; gap:6px; }
+.sd { width:5px; height:5px; border-radius:50%; }
+.sd.g { background:#4caf7d; }.sd.a { background:#d4a843; }
+
+/* ページ切り替え */
+.page { display:none; position:relative; z-index:1; }
+.page.active { display:block; }
+
+/* ===== ポータルページ ===== */
+#portal-page { padding:80px 36px 52px; max-width:1100px; margin:0 auto; }
+
+.ph { margin-bottom:36px; padding-bottom:24px; border-bottom:1px solid var(--border); display:flex; align-items:flex-end; justify-content:space-between; }
+.ph-left {}
+.ph-label {
+  font-family:'Cormorant Garamond',serif;
+  font-size:11px; letter-spacing:.35em; color:var(--gold);
+  text-transform:uppercase; margin-bottom:6px;
+}
+.ph-title { font-size:22px; font-weight:700; color:var(--navy); letter-spacing:.04em; }
+.ph-right { font-size:11px; color:var(--sub); font-family:'DM Mono',monospace; text-align:right; }
+
+.grid { display:grid; grid-template-columns:repeat(12,1fr); gap:12px; }
+.c8{grid-column:span 8;} .c4{grid-column:span 4;} .c6{grid-column:span 6;} .c12{grid-column:span 12;}
+
+/* カード */
+.pcard {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--navy);
+  border-radius: 2px;
+  overflow: visible; cursor:pointer;
+  transition: box-shadow .2s, border-top-color .2s, transform .18s;
+  position:relative; opacity:0; animation:fadeUp .45s forwards;
+}
+.pcard:hover { box-shadow: 0 4px 20px rgba(26,39,68,0.1); transform:translateY(-2px); border-top-color: var(--accent); }
+.pcard.blue:hover  { border-top-color: #2563eb; }
+.pcard.green:hover { border-top-color: var(--green); }
+
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);} to{opacity:1;transform:translateY(0);} }
+.pcard:nth-child(1){animation-delay:.08s;} .pcard:nth-child(2){animation-delay:.14s;} .pcard:nth-child(3){animation-delay:.2s;} .pcard:nth-child(4){animation-delay:.26s;} .pcard:nth-child(5){animation-delay:.32s;}
+
+.pi { padding:20px 22px 18px; }
+.ptag {
+  font-family:'DM Mono',monospace; font-size:9px;
+  letter-spacing:.22em; color:var(--sub); margin-bottom:10px;
+  text-transform:uppercase; display:flex; align-items:center; gap:8px;
+}
+.ptag::before { content:''; width:16px; height:1px; background:var(--border2); }
+.ptitle { font-size:16px; font-weight:700; margin-bottom:7px; color:var(--navy); line-height:1.3; }
+.psub { font-size:11px; color:var(--muted); font-weight:400; margin-bottom:14px; line-height:1.7; }
+.plinks { display:flex; flex-direction:column; gap:4px; }
+.plink {
+  display:flex; align-items:center; gap:8px; font-size:12px; color:var(--muted);
+  padding:8px 10px; border-radius:2px; background:var(--surface2);
+  border:1px solid var(--border); transition:all .14s; cursor:pointer; text-decoration:none;
+}
+.plink:hover { background:#eef2fa; border-color:#a8b8d8; color:var(--navy); }
+.pcard.green .plink:hover { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); }
+.plink-ico { width:15px; height:15px; display:flex; align-items:center; justify-content:center; opacity:.5; flex-shrink:0; }
+.parr { margin-left:auto; font-size:11px; opacity:.3; transition:opacity .14s, transform .14s; }
+.plink:hover .parr { opacity:.6; transform:translateX(2px); }
+
+/* 見積もりカード */
+.mcard {
+  background:var(--surface); border:1px solid var(--border);
+  border-top:3px solid var(--green);
+  border-radius:2px; position:relative; opacity:0;
+  animation:fadeUp .45s .14s forwards; transition:box-shadow .2s, transform .18s;
+}
+.mcard:hover { box-shadow:0 4px 20px rgba(26,39,68,0.1); transform:translateY(-2px); }
+.mcard-main { padding:20px 22px 16px; cursor:default; }
+.mcard-title { font-size:16px; font-weight:700; color:var(--green); margin-bottom:5px; }
+.mcard-sub { font-size:11px; color:var(--muted); }
+
+.mdrop {
+  display:none; position:absolute; top:calc(100% + 1px); left:-1px; right:-1px;
+  background:var(--surface); border:1px solid var(--border2);
+  border-top:none; border-radius:0 0 4px 4px; z-index:200;
+  padding:12px 14px 14px;
+  box-shadow:0 8px 24px rgba(26,39,68,0.12);
+}
+.mcard:hover .mdrop { display:block; }
+.branch-row { display:flex; gap:6px; margin-bottom:10px; }
+.bbtn {
+  flex:1; padding:7px 0; border-radius:2px;
+  border:1px solid var(--border2);
+  background:transparent; color:var(--muted);
+  font-family:'Noto Sans JP',sans-serif; font-size:12px; font-weight:500;
+  cursor:pointer; transition:all .14s;
+}
+.bbtn:hover,.bbtn.on { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); }
+.kpanel { display:none; } .kpanel.show { display:block; }
+.klabel { font-size:9px; letter-spacing:.18em; color:var(--sub); font-family:'DM Mono',monospace; margin-bottom:7px; }
+.kbtns { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
+.kbtn {
+  padding:5px 11px; border-radius:2px; border:1px solid var(--border);
+  background:var(--surface2); color:var(--muted);
+  font-size:11px; cursor:pointer; transition:all .12s; font-family:'Noto Sans JP',sans-serif;
+}
+.kbtn:hover { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); }
+.srow { display:flex; gap:6px; }
+.sinput {
+  flex:1; background:var(--surface2); border:1px solid var(--border2);
+  border-radius:2px; padding:7px 10px; color:var(--text);
+  font-size:12px; font-family:'Noto Sans JP',sans-serif; outline:none; transition:border-color .14s;
+}
+.sinput:focus { border-color:var(--green); }
+.sinput::placeholder { color:var(--sub); }
+.sbtn {
+  padding:7px 13px; border-radius:2px;
+  border:1px solid #a8d0b8; background:#eaf3ec; color:var(--green);
+  font-size:11px; font-family:'Noto Sans JP',sans-serif; cursor:pointer;
+  transition:all .14s; display:flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.sbtn:hover { background:#d4ebd8; }
+
+/* ===== 日計ページ ===== */
+#nikki-page { display:flex; padding-top:56px; height:100vh; }
+
+.nksidebar {
+  width:66px; background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; align-items:center;
+  padding:14px 0; gap:3px; overflow-y:auto; flex-shrink:0; height:calc(100vh - 56px);
+}
+.mbtn {
+  width:50px; height:36px; border-radius:2px; border:1px solid transparent;
+  background:transparent; color:var(--sub); cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif; font-size:11px; font-weight:500;
+  transition:all .14s; display:flex; align-items:center; justify-content:center;
+}
+.mbtn:hover { background:var(--surface2); color:var(--text); border-color:var(--border); }
+.mbtn.on { background:var(--navy); color:#fff; font-weight:700; border-color:var(--navy); }
+
+.nkmain { flex:1; overflow-y:auto; padding:20px 24px 80px; background:var(--bg); }
+
+.mhdr { display:flex; align-items:baseline; gap:10px; margin-bottom:20px; padding-bottom:14px; border-bottom:1px solid var(--border); }
+.mtitle { font-family:'Cormorant Garamond',serif; font-size:40px; font-weight:600; letter-spacing:.02em; color:var(--navy); }
+.myear { font-size:11px; color:var(--muted); letter-spacing:.1em; font-family:'DM Mono',monospace; }
+
+.sec { margin-bottom:14px; }
+.slabel {
+  font-size:9px; letter-spacing:.22em; color:var(--gold); text-transform:uppercase;
+  font-family:'DM Mono',monospace; margin-bottom:8px;
+  display:flex; align-items:center; gap:8px;
+}
+.slabel::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.ref-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:14px; }
+.ref-card { background:var(--surface); border:1px solid var(--border); border-radius:2px; padding:10px 14px; }
+.ref-lbl { font-size:9px; color:var(--sub); letter-spacing:.12em; margin-bottom:4px; }
+.ref-val { font-family:'DM Mono',monospace; font-size:14px; font-weight:500; color:var(--navy); }
+
+.ifield {
+  background:transparent; border:none; outline:none;
+  font-family:'DM Mono',monospace; font-size:14px; font-weight:500;
+  color:var(--text); width:100%; text-align:right;
+  border-bottom:1px solid var(--border2); padding:2px 0; transition:border-color .14s;
+}
+.ifield:focus { border-bottom-color:var(--navy); }
+.ifield::placeholder { color:var(--sub); }
+
+.ketsu-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-left:4px solid var(--navy); border-radius:2px; padding:14px 16px; margin-bottom:14px;
+}
+.ketsu-lbl { font-size:9px; letter-spacing:.2em; color:var(--navy); margin-bottom:8px; font-family:'DM Mono',monospace; }
+.ketsu-big {
+  background:transparent; border:none; outline:none;
+  font-family:'DM Mono',monospace; font-size:28px; font-weight:500;
+  color:var(--navy); width:100%;
+  border-bottom:2px solid var(--border2); padding:3px 0; transition:border-color .14s;
+}
+.ketsu-big:focus { border-bottom-color:var(--navy); }
+.ratio-row { display:flex; gap:16px; margin-top:10px; }
+.ri { display:flex; flex-direction:column; gap:2px; }
+.rl { font-size:9px; color:var(--sub); }
+.rv { font-family:'DM Mono',monospace; font-size:12px; font-weight:500; }
+.rg { color:var(--green); } .rr { color:var(--red); }
+
+.bo-tbl { width:100%; border-collapse:collapse; margin-bottom:6px; }
+.bo-tbl th { font-size:9px; color:var(--sub); letter-spacing:.12em; text-align:left; padding:6px 8px; border-bottom:2px solid var(--border2); font-weight:400; font-family:'DM Mono',monospace; }
+.bo-tbl th:last-child { width:26px; }
+.bo-tbl td { padding:5px 8px; border-bottom:1px solid var(--border); }
+.bo-inp { background:transparent; border:none; outline:none; font-family:'Noto Sans JP',sans-serif; font-size:12px; color:var(--text); width:100%; border-bottom:1px solid transparent; padding:1px 0; transition:border-color .14s; }
+.bo-inp:focus { border-bottom-color:var(--navy); }
+.bo-inp.n { font-family:'DM Mono',monospace; text-align:right; }
+.bo-del { cursor:pointer; color:var(--sub); font-size:14px; padding:0 3px; background:transparent; border:none; transition:color .14s; }
+.bo-del:hover { color:var(--red); }
+.bo-sub { display:flex; justify-content:flex-end; align-items:center; gap:8px; font-family:'DM Mono',monospace; font-size:11px; padding:6px 8px; color:var(--muted); border-top:2px solid var(--border2); background:var(--surface2); }
+.bo-sv { font-size:14px; font-weight:500; color:var(--navy); }
+.add-btn { font-size:11px; color:var(--muted); cursor:pointer; padding:6px 10px; border:1px dashed var(--border2); border-radius:2px; display:inline-flex; align-items:center; gap:5px; transition:all .14s; background:transparent; }
+.add-btn:hover { border-color:var(--navy); color:var(--navy); }
+
+.gcard {
+  background:var(--navy); border-radius:2px; padding:14px 18px; margin-bottom:14px;
+  display:flex; align-items:center; justify-content:space-between;
+}
+.glabel { font-size:9px; letter-spacing:.2em; color:rgba(255,255,255,0.5); margin-bottom:4px; font-family:'DM Mono',monospace; }
+.gval { font-family:'DM Mono',monospace; font-size:26px; font-weight:500; color:#fff; }
+.gval-unit { font-size:12px; color:rgba(255,255,255,0.5); margin-left:4px; }
+.g-ratios .rl { color:rgba(255,255,255,0.45); }
+.g-ratios .rv { color:#fff; }
+.g-ratios .rg { color:#7dd3a8; } .g-ratios .rr { color:#f87171; }
+
+.mik-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.mik-card { background:var(--surface); border:1px solid var(--border); border-left:4px solid var(--green); border-radius:2px; padding:12px 14px; }
+.mik-card.b { border-left-color:#4f46e5; }
+.mik-lbl { font-size:9px; letter-spacing:.2em; color:var(--green); margin-bottom:6px; font-family:'DM Mono',monospace; }
+.mik-card.b .mik-lbl { color:#4f46e5; }
+.mik-hint { font-size:9px; color:var(--sub); }
+.mik-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.mik-total { font-family:'DM Mono',monospace; font-size:11px; color:var(--muted); border-top:1px solid var(--border); padding-top:7px; margin-top:4px; display:flex; justify-content:space-between; }
+.mik-tv { font-weight:500; color:var(--navy); font-size:13px; }
+
+.sha-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px; }
+.sha-card { background:var(--surface); border:1px solid var(--border); border-radius:2px; padding:12px 14px; }
+.sha-card.hon { border-left:4px solid #b45309; }
+.sha-card.zen { border-left:4px solid #7c3aed; }
+.sha-lbl { font-size:9px; letter-spacing:.2em; margin-bottom:8px; font-family:'DM Mono',monospace; }
+.sha-card.hon .sha-lbl { color:#b45309; } .sha-card.zen .sha-lbl { color:#7c3aed; }
+.sha-row { display:flex; align-items:center; justify-content:space-between; gap:7px; margin-bottom:5px; }
+.sha-rl { font-size:11px; color:var(--muted); min-width:34px; }
+.sha-inp { background:transparent; border:none; outline:none; font-family:'DM Mono',monospace; font-size:13px; font-weight:500; color:var(--text); text-align:right; flex:1; border-bottom:1px solid var(--border2); padding:2px 0; transition:border-color .14s; }
+.sha-inp:focus { border-bottom-color:var(--navy); }
+.sha-rv { font-family:'DM Mono',monospace; font-size:11px; min-width:50px; text-align:right; font-weight:500; }
+
+.xbar {
+  position:fixed; bottom:0; left:66px; right:0;
+  background:var(--surface); border-top:1px solid var(--border);
+  padding:10px 20px; display:flex; align-items:center; gap:10px; z-index:200;
+}
+.xbtn { background:var(--navy); color:#fff; border:none; cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:12px; font-weight:700; padding:8px 18px; border-radius:2px; transition:background .14s; display:flex; align-items:center; gap:7px; }
+.xbtn:hover { background:var(--navy2); }
+.svbtn { background:transparent; color:var(--muted); border:1px solid var(--border2); cursor:pointer; font-family:'Noto Sans JP',sans-serif; font-size:12px; padding:8px 14px; border-radius:2px; transition:all .14s; }
+.svbtn:hover { border-color:var(--navy); color:var(--navy); }
+.xinfo { font-size:11px; color:var(--muted); margin-left:auto; font-family:'DM Mono',monospace; }
+
+@media(max-width:768px){
+  .c8,.c4,.c6,.c12{grid-column:span 12;}
+  #portal-page{padding:72px 16px 48px;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo" onclick="showPage('portal')">
+    <div class="logo-mark">SP</div>
+    <div class="logo-text">スポットポータル</div>
+    <div class="logo-sep" id="hdr-sep" style="display:none"></div>
+    <div class="logo-page" id="hdr-page"></div>
+  </div>
+  <div class="hdr-right">
+    <div class="clock" id="clock">--:--:--</div>
+    <button class="back-btn" id="back-btn" style="display:none" onclick="showPage('portal')">← メニューへ</button>
+  </div>
+</header>
+
+<!-- ===== ポータル ===== -->
+<div id="portal-page" class="page active">
+  <div class="ph">
+    <div class="ph-left">
+      <div class="ph-label">Main Menu</div>
+      <div class="ph-title">スポット業務ポータル</div>
+    </div>
+    <div class="ph-right" id="ph-date"></div>
+  </div>
+
+  <div class="grid">
+
+    <!-- 日計 -->
+    <div class="pcard c8">
+      <div class="pi">
+        <div class="ptag">01 &nbsp;/ SALES MANAGEMENT</div>
+        <div class="ptitle">日計</div>
+        <div class="psub">日次売上の記録・管理・見込み分析</div>
+        <div class="plinks">
+          <div class="plink" onclick="showPage('nikki')">
+            <div class="plink-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+            日計管理<span class="parr">→</span>
+          </div>
+          <div class="plink">
+            <div class="plink-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            見込み分析<span class="parr">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 見積もり管理 -->
+    <div class="mcard c4">
+      <div class="mcard-main">
+        <div class="ptag">04 &nbsp;/ ESTIMATE</div>
+        <div class="mcard-title">見積もり管理</div>
+        <div class="mcard-sub">本社・支社フォルダへのアクセス</div>
+      </div>
+      <div class="mdrop">
+        <div class="branch-row">
+          <button class="bbtn" id="bb-hon" onclick="selBranch('hon',event)">本社</button>
+          <button class="bbtn" id="bb-shi" onclick="selBranch('shi',event)">支社</button>
+        </div>
+        <div class="kpanel" id="kpanel">
+          <div class="klabel">スポンサー頭文字で絞り込み</div>
+          <div class="kbtns">
+            <button class="kbtn" onclick="openFolder('あ行',event)">あ行</button>
+            <button class="kbtn" onclick="openFolder('か行',event)">か行</button>
+            <button class="kbtn" onclick="openFolder('さ行',event)">さ行</button>
+            <button class="kbtn" onclick="openFolder('た行',event)">た行</button>
+            <button class="kbtn" onclick="openFolder('な行',event)">な行</button>
+            <button class="kbtn" onclick="openFolder('は行',event)">は行</button>
+            <button class="kbtn" onclick="openFolder('ま行',event)">ま行</button>
+            <button class="kbtn" onclick="openFolder('や行',event)">や行</button>
+            <button class="kbtn" onclick="openFolder('ら行',event)">ら行</button>
+            <button class="kbtn" onclick="openFolder('わ行',event)">わ行</button>
+          </div>
+          <div class="srow">
+            <input class="sinput" id="sinput" placeholder="スポンサー名で検索…" onkeydown="if(event.key==='Enter')doSearch(event)">
+            <button class="sbtn" onclick="doSearch(event)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>検索
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRP管理 -->
+    <div class="pcard blue c6">
+      <div class="pi">
+        <div class="ptag">02 &nbsp;/ GRP MANAGEMENT</div>
+        <div class="ptitle">GRP管理</div>
+        <div class="psub">月別・メンバー別のGRP配分管理</div>
+        <div class="plinks">
+          <div class="plink">
+            <div class="plink-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+            月別GRP<span class="parr">→</span>
+          </div>
+          <div class="plink">
+            <div class="plink-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4"/><path d="M16 11h6M19 8v6"/></svg></div>
+            メンバー別使用予定GRP<span class="parr">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3代理店シェア表 -->
+    <div class="pcard c6">
+      <div class="pi">
+        <div class="ptag">05 &nbsp;/ AGENCY SHARE</div>
+        <div class="ptitle">3代理店シェア表 / オールスポット</div>
+        <div class="psub">主要3代理店のシェア分析・オールスポットデータ</div>
+        <div class="plinks">
+          <div class="plink">
+            <div class="plink-ico"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+            データを開く<span class="parr">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- キー局情報 -->
+    <div class="pcard c12">
+      <div style="padding:18px 22px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="ptag">06 &nbsp;/ NETWORK INFO</div>
+          <div class="ptitle">キー局情報</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px;">キー局の最新情報・スポット動向</div>
+        </div>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" opacity=".12" color="var(--navy)"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== 日計ページ ===== -->
+<div id="nikki-page" class="page">
+  <div class="nksidebar" id="nksidebar"></div>
+  <div class="nkmain" id="nkmain"></div>
+  <div class="xbar">
+    <button class="xbtn" onclick="exportExcel()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Excel 出力
+    </button>
+    <button class="svbtn" onclick="saveData()">保存</button>
+    <div class="xinfo" id="xinfo"></div>
+  </div>
+</div>
+
+<!-- ステータスバー -->
+<div class="statusbar">
+  <div class="si"><div class="sd g"></div><span>ONLINE</span></div>
+  <div class="si"><div class="sd a"></div><span>2026年度</span></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+// ===== ページ切り替え =====
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id+'-page').classList.add('active');
+  const isP = id==='portal';
+  document.getElementById('back-btn').style.display = isP?'none':'';
+  document.getElementById('hdr-sep').style.display  = isP?'none':'';
+  document.getElementById('hdr-page').textContent   = isP?'':({nikki:'日計管理'}[id]||'');
+  if (id==='nikki') { renderSidebar(); renderMain(); }
+}
+
+// ===== 時計・日付 =====
+function tick() {
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    [n.getHours(),n.getMinutes(),n.getSeconds()].map(v=>String(v).padStart(2,'0')).join(':');
+}
+tick(); setInterval(tick,1000);
+(function(){
+  const n=new Date();
+  const week=['日','月','火','水','木','金','土'];
+  document.getElementById('ph-date').textContent =
+    `${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日（${week[n.getDay()]}）`;
+})();
+
+// ===== 見積もりメニュー =====
+let curBranch=null;
+function selBranch(b,e){e.stopPropagation();curBranch=b;document.getElementById('bb-hon').classList.toggle('on',b==='hon');document.getElementById('bb-shi').classList.toggle('on',b==='shi');document.getElementById('kpanel').classList.add('show');}
+function openFolder(row,e){e.stopPropagation();const b=curBranch==='hon'?'本社':curBranch==='shi'?'支社':'（未選択）';alert(`${b} / ${row}\n（SharePoint URLを設定してください）`);}
+function doSearch(e){e.stopPropagation();const q=document.getElementById('sinput').value.trim();if(!q)return;alert(`「${q}」で検索\n（検索URLを設定してください）`);}
+
+// ===== 日計データ =====
+const MONTHS=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
+const INIT={
+  '4月':{ikkaku:242862,zennen:178602,yosan_sha:110000,yosan_zen:250000,ketsu:128000,bo:[{name:'ソフトバンク',val:1000}],mik_a:3000,mik_b:7000,hon_jit:55767,hon_mik:61671,zen_jit:182376,zen_mik:217421},
+  '5月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:128000,bo:[{name:'ソフトバンク',val:1000}],mik_a:3000,mik_b:7000,hon_jit:55767,hon_mik:61671,zen_jit:182376,zen_mik:217421},
+  '6月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:128000,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '7月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '8月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '9月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '10月':{ikkaku:242862,zennen:178602,yosan_sha:110000,yosan_zen:250000,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '11月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '12月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '1月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '2月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+  '3月':{ikkaku:242862,zennen:178602,yosan_sha:null,yosan_zen:null,ketsu:0,bo:[],mik_a:0,mik_b:0,hon_jit:0,hon_mik:0,zen_jit:0,zen_mik:0},
+};
+let appData=JSON.parse(JSON.stringify(INIT));
+try{const s=localStorage.getItem('sp_nikki_2026');if(s)appData=JSON.parse(s);}catch(e){}
+let curMonth=MONTHS[0];
+
+const fmt=n=>n==null?'—':(n/10000).toFixed(1).replace(/\.0$/,'');
+const toM=n=>n?(n/10000).toFixed(1).replace(/\.0$/,''):'';
+const num=s=>{const n=parseFloat(String(s).replace(/,/g,''));return isNaN(n)?0:n;};
+const pct=(a,b)=>(!a||!b)?null:((a/b)*100).toFixed(1);
+const pcls=v=>v==null?'':parseFloat(v)>=100?'rg':'rr';
+
+function renderSidebar(){
+  document.getElementById('nksidebar').innerHTML=MONTHS.map(m=>
+    `<button class="mbtn ${m===curMonth?'on':''}" onclick="selMonth('${m}')">${m}</button>`
+  ).join('');
+}
+function selMonth(m){saveToData();curMonth=m;renderSidebar();renderMain();}
+
+function saveToData(){
+  const d=appData[curMonth];
+  const g=id=>document.getElementById(id);
+  if(g('ik'))d.ketsu=num(g('ik').value)*10000;
+  if(g('im-a'))d.mik_a=num(g('im-a').value)*10000;
+  if(g('im-b'))d.mik_b=num(g('im-b').value)*10000;
+  ['hon_jit','hon_mik','zen_jit','zen_mik'].forEach(k=>{const el=g('i-'+k);if(el)d[k]=num(el.value)*10000;});
+  if(g('iy-s'))d.yosan_sha=num(g('iy-s').value)*10000||null;
+  if(g('iy-z'))d.yosan_zen=num(g('iy-z').value)*10000||null;
+  d.bo=[];
+  document.querySelectorAll('.bo-row').forEach(r=>{
+    const nm=r.querySelector('.bo-nm').value.trim();
+    const vl=num(r.querySelector('.bo-vl').value)*10000;
+    if(nm||vl)d.bo.push({name:nm,val:vl});
+  });
+}
+
+function renderMain(){
+  const d=appData[curMonth];
+  const boT=d.bo.reduce((s,x)=>s+(x.val||0),0);
+  const gok=(d.ketsu||0)+boT;
+  const mA=gok+(d.mik_a||0);
+  const mAB=mA+(d.mik_b||0);
+  const rH=(v,b,lb)=>{const p=pct(v,b);return p?`<div class="ri"><div class="rl">${lb}</div><div class="rv ${pcls(p)}">${p}%</div></div>`:''};
+
+  document.getElementById('nkmain').innerHTML=`
+    <div class="mhdr"><div class="mtitle">${curMonth}</div><div class="myear">2026年度</div></div>
+
+    <div class="sec">
+      <div class="slabel">参照データ</div>
+      <div class="ref-grid">
+        <div class="ref-card"><div class="ref-lbl">一昨年実績（万円）</div><div class="ref-val">${fmt(d.ikkaku)}</div></div>
+        <div class="ref-card"><div class="ref-lbl">昨年実績（万円）</div><div class="ref-val">${fmt(d.zennen)}</div></div>
+        <div class="ref-card">
+          <div class="ref-lbl">予算 支社 / 全社（万円）</div>
+          <div style="display:flex;gap:10px;align-items:baseline;margin-top:4px">
+            <input class="ifield" id="iy-s" value="${toM(d.yosan_sha)}" placeholder="—" style="font-size:13px;max-width:70px" oninput="recalc()">
+            <span style="color:var(--sub)">/</span>
+            <input class="ifield" id="iy-z" value="${toM(d.yosan_zen)}" placeholder="—" style="font-size:13px;max-width:70px" oninput="recalc()">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="slabel">決・内</div>
+      <div class="ketsu-card">
+        <div class="ketsu-lbl">KETSU-NAI</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <input class="ketsu-big" id="ik" value="${toM(d.ketsu)}" placeholder="0" oninput="recalc()">
+          <span style="font-size:11px;color:var(--muted)">万円</span>
+        </div>
+        <div class="ratio-row" id="kr">${rH(d.ketsu,d.yosan_zen,'予算比')}${rH(d.ketsu,d.zennen,'昨年比')}${rH(d.ketsu,d.ikkaku,'一昨年比')}</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="slabel">B・O</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:2px;overflow:hidden">
+        <table class="bo-tbl">
+          <thead><tr><th>スポンサー</th><th style="text-align:right">金額（万円）</th><th></th></tr></thead>
+          <tbody id="botbody">${d.bo.map(x=>`<tr class="bo-row"><td><input class="bo-inp bo-nm" value="${x.name||''}" placeholder="スポンサー名" oninput="recalc()"></td><td><input class="bo-inp bo-vl n" value="${toM(x.val)}" placeholder="0" oninput="recalc()"></td><td><button class="bo-del" onclick="delBO(this)">×</button></td></tr>`).join('')}</tbody>
+        </table>
+        <div class="bo-sub"><span>小計</span><span class="bo-sv" id="bosum">${fmt(boT)}<span style="font-size:10px;font-weight:400;margin-left:2px">万円</span></span></div>
+      </div>
+      <div style="margin-top:6px"><button class="add-btn" onclick="addBO()">＋ 行を追加</button></div>
+    </div>
+
+    <div class="sec">
+      <div class="slabel">合計</div>
+      <div class="gcard">
+        <div><div class="glabel">合計 ＝ 決内 ＋ B・O計</div><div class="gval" id="gv">${fmt(gok)}<span class="gval-unit">万円</span></div></div>
+        <div class="ratio-row g-ratios" id="gr">${rH(gok,d.yosan_zen,'予算比')}${rH(gok,d.zennen,'昨年比')}</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="slabel">見込み</div>
+      <div class="mik-grid">
+        <div class="mik-card">
+          <div class="mik-lbl">見込み A</div>
+          <div class="mik-row"><span class="mik-hint">合計 ＋</span><input class="ifield" id="im-a" value="${toM(d.mik_a)}" placeholder="0" style="max-width:100px" oninput="recalc()"><span class="mik-hint">万円</span></div>
+          <div class="mik-total"><span>計（A）</span><span class="mik-tv" id="ma">${fmt(mA)} 万円</span></div>
+        </div>
+        <div class="mik-card b">
+          <div class="mik-lbl">見込み B</div>
+          <div class="mik-row"><span class="mik-hint">計(A) ＋</span><input class="ifield" id="im-b" value="${toM(d.mik_b)}" placeholder="0" style="max-width:100px" oninput="recalc()"><span class="mik-hint">万円</span></div>
+          <div class="mik-total"><span>計（A＋B）</span><span class="mik-tv" id="mab">${fmt(mAB)} 万円</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="slabel">本社 / 全社</div>
+      <div class="sha-grid">
+        <div class="sha-card hon">
+          <div class="sha-lbl">本社</div>
+          <div class="sha-row"><span class="sha-rl">実数</span><input class="sha-inp" id="i-hon_jit" value="${toM(d.hon_jit)}" placeholder="0" oninput="recalc()"><span class="sha-rv ${pcls(pct(d.hon_jit,d.zennen))}" id="r-hj">${pct(d.hon_jit,d.zennen)?pct(d.hon_jit,d.zennen)+'%':'—'}</span></div>
+          <div class="sha-row"><span class="sha-rl">見込</span><input class="sha-inp" id="i-hon_mik" value="${toM(d.hon_mik)}" placeholder="0" oninput="recalc()"><span class="sha-rv ${pcls(pct(d.hon_mik,d.zennen))}" id="r-hm">${pct(d.hon_mik,d.zennen)?pct(d.hon_mik,d.zennen)+'%':'—'}</span></div>
+        </div>
+        <div class="sha-card zen">
+          <div class="sha-lbl">全社</div>
+          <div class="sha-row"><span class="sha-rl">実数</span><input class="sha-inp" id="i-zen_jit" value="${toM(d.zen_jit)}" placeholder="0" oninput="recalc()"><span class="sha-rv ${pcls(pct(d.zen_jit,d.zennen))}" id="r-zj">${pct(d.zen_jit,d.zennen)?pct(d.zen_jit,d.zennen)+'%':'—'}</span></div>
+          <div class="sha-row"><span class="sha-rl">見込</span><input class="sha-inp" id="i-zen_mik" value="${toM(d.zen_mik)}" placeholder="0" oninput="recalc()"><span class="sha-rv ${pcls(pct(d.zen_mik,d.zennen))}" id="r-zm">${pct(d.zen_mik,d.zennen)?pct(d.zen_mik,d.zennen)+'%':'—'}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addBO(){const tb=document.getElementById('botbody');const tr=document.createElement('tr');tr.className='bo-row';tr.innerHTML=`<td><input class="bo-inp bo-nm" value="" placeholder="スポンサー名" oninput="recalc()"></td><td><input class="bo-inp bo-vl n" value="" placeholder="0" oninput="recalc()"></td><td><button class="bo-del" onclick="delBO(this)">×</button></td>`;tb.appendChild(tr);}
+function delBO(btn){btn.closest('tr').remove();recalc();}
+
+function recalc(){
+  const d=appData[curMonth];
+  const yz=num(document.getElementById('iy-z')?.value)*10000||d.yosan_zen;
+  const zn=d.zennen;const ik=d.ikkaku;
+  const kt=num(document.getElementById('ik')?.value)*10000;
+  let boT=0;document.querySelectorAll('.bo-vl').forEach(el=>{boT+=num(el.value)*10000;});
+  const go=kt+boT;
+  const mA=num(document.getElementById('im-a')?.value)*10000;
+  const mB=num(document.getElementById('im-b')?.value)*10000;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('bosum',fmt(boT));set('gv',fmt(go));set('ma',fmt(go+mA)+' 万円');set('mab',fmt(go+mA+mB)+' 万円');
+  document.getElementById('gv').innerHTML=`${fmt(go)}<span class="gval-unit">万円</span>`;
+  const rH=(v,b,lb)=>{const p=pct(v,b);return p?`<div class="ri"><div class="rl">${lb}</div><div class="rv ${pcls(p)}">${p}%</div></div>`:''};
+  const sr=(id,v)=>{const el=document.getElementById(id);if(el)el.innerHTML=v;};
+  sr('kr',rH(kt,yz,'予算比')+rH(kt,zn,'昨年比')+rH(kt,ik,'一昨年比'));
+  sr('gr',rH(go,yz,'予算比')+rH(go,zn,'昨年比'));
+  [['hon_jit','r-hj'],['hon_mik','r-hm'],['zen_jit','r-zj'],['zen_mik','r-zm']].forEach(([k,id])=>{
+    const v=num(document.getElementById('i-'+k)?.value)*10000;
+    const p=pct(v,zn);const el=document.getElementById(id);
+    if(el){el.textContent=p?p+'%':'—';el.className='sha-rv '+pcls(p);}
+  });
+}
+
+function saveData(){
+  saveToData();
+  localStorage.setItem('sp_nikki_2026',JSON.stringify(appData));
+  const el=document.getElementById('xinfo');
+  el.textContent=`保存済み  ${new Date().toLocaleTimeString('ja-JP')}`;
+  setTimeout(()=>el.textContent='',3000);
+}
+
+function exportExcel(){
+  saveToData();
+  const wb=XLSX.utils.book_new();
+  MONTHS.forEach(m=>{
+    const d=appData[m];
+    const boT=d.bo.reduce((s,x)=>s+(x.val||0),0);
+    const go=(d.ketsu||0)+boT;
+    const rows=[
+      ['2026年度 日計 — '+m],['単位：万円'],[],
+      ['一昨年実績',fmt(d.ikkaku)],['昨年実績',fmt(d.zennen)],['予算（全社）',fmt(d.yosan_zen)],[],
+      ['決・内',fmt(d.ketsu)],
+      ...d.bo.map(x=>['  '+x.name,fmt(x.val)]),
+      ['B・O計',fmt(boT)],['合計',fmt(go)],[],
+      ['見込A',fmt(d.mik_a)],['計(A)',fmt(go+(d.mik_a||0))],
+      ['見込B',fmt(d.mik_b)],['計(A+B)',fmt(go+(d.mik_a||0)+(d.mik_b||0))],[],
+      ['本社実数',fmt(d.hon_jit)],['本社見込',fmt(d.hon_mik)],
+      ['全社実数',fmt(d.zen_jit)],['全社見込',fmt(d.zen_mik)],
+    ];
+    const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:16},{wch:12}];
+    XLSX.utils.book_append_sheet(wb,ws,m);
+  });
+  XLSX.writeFile(wb,`日計_2026年度_${new Date().toLocaleDateString('ja-JP').replace(/\//g,'')}.xlsx`);
+}
+
+window.addEventListener('beforeunload',saveData);
+</script>
+</body>
+</html>
