@@ -145,51 +145,76 @@ header {
   animation:fadeUp .45s .14s forwards; transition:box-shadow .2s, transform .18s;
 }
 .mcard:hover { box-shadow:0 4px 20px rgba(26,39,68,0.1); transform:translateY(-2px); }
-.mcard-main { padding:20px 22px 16px; cursor:default; }
+.mcard-main { padding:20px 22px 18px; cursor:default; }
 .mcard-title { font-size:16px; font-weight:700; color:var(--green); margin-bottom:5px; }
-.mcard-sub { font-size:11px; color:var(--muted); }
-
-.mdrop {
-  display:none; position:absolute; top:calc(100% + 1px); left:-1px; right:-1px;
-  background:var(--surface); border:1px solid var(--border2);
-  border-top:none; border-radius:0 0 4px 4px; z-index:200;
-  padding:12px 14px 14px;
-  box-shadow:0 8px 24px rgba(26,39,68,0.12);
-}
-.mcard:hover .mdrop { display:block; }
-.branch-row { display:flex; gap:6px; margin-bottom:10px; }
-.bbtn {
-  flex:1; padding:7px 0; border-radius:2px;
+.mcard-sub { font-size:11px; color:var(--muted); margin-bottom:14px; }
+.mcard-btns { display:flex; gap:8px; padding:0 22px 20px; }
+.mbranch-btn {
+  flex:1; padding:10px 0; border-radius:2px;
   border:1px solid var(--border2);
-  background:transparent; color:var(--muted);
-  font-family:'Noto Sans JP',sans-serif; font-size:12px; font-weight:500;
-  cursor:pointer; transition:all .14s;
-}
-.bbtn:hover,.bbtn.on { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); }
-.kpanel { display:none; } .kpanel.show { display:block; }
-.klabel { font-size:9px; letter-spacing:.18em; color:var(--sub); font-family:'DM Mono',monospace; margin-bottom:7px; }
-.kbtns { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px; }
-.kbtn {
-  padding:5px 11px; border-radius:2px; border:1px solid var(--border);
   background:var(--surface2); color:var(--muted);
-  font-size:11px; cursor:pointer; transition:all .12s; font-family:'Noto Sans JP',sans-serif;
+  font-family:'Noto Sans JP',sans-serif; font-size:13px; font-weight:500;
+  cursor:pointer; transition:all .15s; letter-spacing:.04em;
+  display:flex; align-items:center; justify-content:center; gap:6px;
 }
-.kbtn:hover { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); }
-.srow { display:flex; gap:6px; }
-.sinput {
-  flex:1; background:var(--surface2); border:1px solid var(--border2);
-  border-radius:2px; padding:7px 10px; color:var(--text);
-  font-size:12px; font-family:'Noto Sans JP',sans-serif; outline:none; transition:border-color .14s;
+.mbranch-btn:hover { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); }
+
+/* 見積もりページ */
+#estimate-page { padding:80px 36px 52px; max-width:900px; margin:0 auto; }
+.est-hdr { margin-bottom:32px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+.est-title { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:600; color:var(--navy); margin-bottom:4px; }
+.est-branch { display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--green); font-weight:500; margin-top:8px; }
+.est-branch-dot { width:7px; height:7px; border-radius:50%; background:var(--green); }
+
+.est-tabs { display:flex; gap:0; margin-bottom:28px; border-bottom:2px solid var(--border); }
+.est-tab {
+  padding:10px 24px; font-size:13px; font-weight:500; color:var(--muted);
+  cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-2px;
+  transition:all .15s; letter-spacing:.04em;
 }
-.sinput:focus { border-color:var(--green); }
-.sinput::placeholder { color:var(--sub); }
-.sbtn {
-  padding:7px 13px; border-radius:2px;
-  border:1px solid #a8d0b8; background:#eaf3ec; color:var(--green);
-  font-size:11px; font-family:'Noto Sans JP',sans-serif; cursor:pointer;
-  transition:all .14s; display:flex; align-items:center; gap:5px; white-space:nowrap;
+.est-tab:hover { color:var(--green); }
+.est-tab.on { color:var(--green); border-bottom-color:var(--green); }
+
+.est-search-box {
+  background:var(--surface); border:1px solid var(--border);
+  border-top:3px solid var(--navy); border-radius:2px; padding:22px 24px; margin-bottom:28px;
 }
-.sbtn:hover { background:#d4ebd8; }
+.est-search-label { font-size:9px; letter-spacing:.22em; color:var(--gold); font-family:'DM Mono',monospace; margin-bottom:12px; }
+.est-srow { display:flex; gap:8px; }
+.est-sinput {
+  flex:1; background:var(--bg); border:1px solid var(--border2);
+  border-radius:2px; padding:10px 14px; color:var(--text);
+  font-size:14px; font-family:'Noto Sans JP',sans-serif; outline:none; transition:border-color .14s;
+}
+.est-sinput:focus { border-color:var(--navy); }
+.est-sinput::placeholder { color:var(--sub); }
+.est-sbtn {
+  padding:10px 22px; border-radius:2px;
+  border:none; background:var(--navy); color:#fff;
+  font-size:13px; font-family:'Noto Sans JP',sans-serif; font-weight:700;
+  cursor:pointer; transition:background .14s; display:flex; align-items:center; gap:7px;
+}
+.est-sbtn:hover { background:var(--navy2); }
+
+.kana-section-label {
+  font-size:9px; letter-spacing:.22em; color:var(--gold); font-family:'DM Mono',monospace;
+  margin-bottom:12px; display:flex; align-items:center; gap:8px;
+}
+.kana-section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+.kana-grid {
+  display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-bottom:12px;
+}
+.kana-btn {
+  padding:16px 0; border-radius:2px; border:1px solid var(--border);
+  background:var(--surface); color:var(--navy); font-weight:500;
+  font-size:14px; cursor:pointer; transition:all .15s;
+  font-family:'Noto Sans JP',sans-serif; text-align:center;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+}
+.kana-btn:hover { background:#eaf3ec; border-color:#a8d0b8; color:var(--green); transform:translateY(-1px); box-shadow:0 3px 10px rgba(29,107,74,0.1); }
+.kana-btn small { font-size:9px; color:var(--sub); font-weight:400; letter-spacing:.05em; }
+.kana-btn:hover small { color:var(--green); }
 
 /* ===== 日計ページ ===== */
 #nikki-page { display:flex; padding-top:56px; height:100vh; }
@@ -371,32 +396,16 @@ header {
         <div class="mcard-title">見積もり管理</div>
         <div class="mcard-sub">本社・支社フォルダへのアクセス</div>
       </div>
-      <div class="mdrop">
-        <div class="branch-row">
-          <button class="bbtn" id="bb-hon" onclick="selBranch('hon',event)">本社</button>
-          <button class="bbtn" id="bb-shi" onclick="selBranch('shi',event)">支社</button>
-        </div>
-        <div class="kpanel" id="kpanel">
-          <div class="klabel">スポンサー頭文字で絞り込み</div>
-          <div class="kbtns">
-            <button class="kbtn" onclick="openFolder('あ行',event)">あ行</button>
-            <button class="kbtn" onclick="openFolder('か行',event)">か行</button>
-            <button class="kbtn" onclick="openFolder('さ行',event)">さ行</button>
-            <button class="kbtn" onclick="openFolder('た行',event)">た行</button>
-            <button class="kbtn" onclick="openFolder('な行',event)">な行</button>
-            <button class="kbtn" onclick="openFolder('は行',event)">は行</button>
-            <button class="kbtn" onclick="openFolder('ま行',event)">ま行</button>
-            <button class="kbtn" onclick="openFolder('や行',event)">や行</button>
-            <button class="kbtn" onclick="openFolder('ら行',event)">ら行</button>
-            <button class="kbtn" onclick="openFolder('わ行',event)">わ行</button>
-          </div>
-          <div class="srow">
-            <input class="sinput" id="sinput" placeholder="スポンサー名で検索…" onkeydown="if(event.key==='Enter')doSearch(event)">
-            <button class="sbtn" onclick="doSearch(event)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>検索
-            </button>
-          </div>
-        </div>
+      <div class="mcard-btns">
+        <button class="mbranch-btn" onclick="showEstimate('honsha')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>本社
+        </button>
+        <button class="mbranch-btn" onclick="showEstimate('shisha')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>支社
+        </button>
+      </div>
+    </div>
+    
       </div>
     </div>
 
@@ -449,6 +458,51 @@ header {
   </div>
 </div>
 
+
+<!-- ===== 見積もりページ ===== -->
+<div id="estimate-page" class="page">
+  <div class="est-hdr">
+    <div class="est-title">見積もり管理</div>
+    <div class="est-branch" id="est-branch-label">
+      <div class="est-branch-dot"></div>
+      <span id="est-branch-name">本社</span>
+    </div>
+  </div>
+
+  <!-- 本社/支社 タブ -->
+  <div class="est-tabs">
+    <div class="est-tab on" id="tab-honsha" onclick="switchBranch('honsha')">本社</div>
+    <div class="est-tab" id="tab-shisha" onclick="switchBranch('shisha')">支社</div>
+  </div>
+
+  <!-- 検索 -->
+  <div class="est-search-box">
+    <div class="est-search-label">SEARCH</div>
+    <div class="est-srow">
+      <input class="est-sinput" id="est-sinput" type="text" placeholder="スポンサー名で検索…" onkeydown="if(event.key==='Enter')estSearch()">
+      <button class="est-sbtn" onclick="estSearch()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        検索
+      </button>
+    </div>
+  </div>
+
+  <!-- かな行 -->
+  <div class="kana-section-label">スポンサー頭文字で絞り込み</div>
+  <div class="kana-grid">
+    <button class="kana-btn" onclick="openKana('あ行')">あ行<small>あいうえお</small></button>
+    <button class="kana-btn" onclick="openKana('か行')">か行<small>かきくけこ</small></button>
+    <button class="kana-btn" onclick="openKana('さ行')">さ行<small>さしすせそ</small></button>
+    <button class="kana-btn" onclick="openKana('た行')">た行<small>たちつてと</small></button>
+    <button class="kana-btn" onclick="openKana('な行')">な行<small>なにぬねの</small></button>
+    <button class="kana-btn" onclick="openKana('は行')">は行<small>はひふへほ</small></button>
+    <button class="kana-btn" onclick="openKana('ま行')">ま行<small>まみむめも</small></button>
+    <button class="kana-btn" onclick="openKana('や行')">や行<small>やゆよ</small></button>
+    <button class="kana-btn" onclick="openKana('ら行')">ら行<small>らりるれろ</small></button>
+    <button class="kana-btn" onclick="openKana('わ行')">わ行<small>わをん</small></button>
+  </div>
+</div>
+
 <!-- ===== 日計ページ ===== -->
 <div id="nikki-page" class="page">
   <div class="nksidebar" id="nksidebar"></div>
@@ -472,14 +526,43 @@ header {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 // ===== ページ切り替え =====
+const PAGE_NAMES = { nikki:'日計管理', estimate:'見積もり管理' };
 function showPage(id) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(id+'-page').classList.add('active');
   const isP = id==='portal';
   document.getElementById('back-btn').style.display = isP?'none':'';
   document.getElementById('hdr-sep').style.display  = isP?'none':'';
-  document.getElementById('hdr-page').textContent   = isP?'':({nikki:'日計管理'}[id]||'');
+  document.getElementById('hdr-page').textContent   = isP?'':(PAGE_NAMES[id]||'');
   if (id==='nikki') { renderSidebar(); renderMain(); }
+}
+
+// ===== 見積もりページ =====
+let curBranch = 'honsha';
+function showEstimate(branch) {
+  curBranch = branch;
+  showPage('estimate');
+  switchBranch(branch);
+}
+function switchBranch(branch) {
+  curBranch = branch;
+  const label = branch === 'honsha' ? '本社' : '支社';
+  document.getElementById('est-branch-name').textContent = label;
+  document.getElementById('tab-honsha').classList.toggle('on', branch==='honsha');
+  document.getElementById('tab-shisha').classList.toggle('on', branch==='shisha');
+  document.getElementById('est-sinput').value = '';
+}
+function estSearch() {
+  const q = document.getElementById('est-sinput').value.trim();
+  if (!q) return;
+  const b = curBranch === 'honsha' ? '本社' : '支社';
+  // window.open('https://your-sharepoint-url/search?branch='+b+'&q='+encodeURIComponent(q), '_blank');
+  alert(b + ' / 検索：「' + q + '」\n（SharePoint の検索URLを設定してください）');
+}
+function openKana(row) {
+  const b = curBranch === 'honsha' ? '本社' : '支社';
+  // window.open('https://your-sharepoint-url/folder?branch='+b+'&kana='+encodeURIComponent(row), '_blank');
+  alert(b + ' / ' + row + '\n（SharePoint のフォルダURLを設定してください）');
 }
 
 // ===== 時計・日付 =====
@@ -496,11 +579,6 @@ tick(); setInterval(tick,1000);
     `${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日（${week[n.getDay()]}）`;
 })();
 
-// ===== 見積もりメニュー =====
-let curBranch=null;
-function selBranch(b,e){e.stopPropagation();curBranch=b;document.getElementById('bb-hon').classList.toggle('on',b==='hon');document.getElementById('bb-shi').classList.toggle('on',b==='shi');document.getElementById('kpanel').classList.add('show');}
-function openFolder(row,e){e.stopPropagation();const b=curBranch==='hon'?'本社':curBranch==='shi'?'支社':'（未選択）';alert(`${b} / ${row}\n（SharePoint URLを設定してください）`);}
-function doSearch(e){e.stopPropagation();const q=document.getElementById('sinput').value.trim();if(!q)return;alert(`「${q}」で検索\n（検索URLを設定してください）`);}
 
 // ===== 日計データ =====
 const MONTHS=['4月','5月','6月','7月','8月','9月','10月','11月','12月','1月','2月','3月'];
